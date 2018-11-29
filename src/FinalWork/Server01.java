@@ -1,0 +1,106 @@
+/**
+ * Copyright (C), 2015-2018, XXX有限公司
+ * FileName: Server01
+ * Author:   Zephon
+ * Date:     2018/11/26 22:33
+ * Description:
+ * History:
+ * <author>          <time>          <version>          <desc>
+ * 作者姓名           修改时间           版本号              描述
+ */
+package FinalWork;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 〈一句话功能简述〉<br> 
+ * 〈〉
+ *
+ * @author Zephon
+ * @create 2018/11/26
+ * @since 1.0.0
+ */
+public class Server01 {
+    public static void main(String[] args) throws IOException {
+        ServerSocket serverSocket = new ServerSocket(8888);
+        List<Channel> list = new ArrayList<>();
+        while(true) {
+            Socket socket = serverSocket.accept();
+            //一个accecpt,一个客户端
+            Channel channel = new Channel(socket);
+            list.add(channel);
+            channel.setList(list);
+            new Thread(channel).start();//一条道路
+            //发送数据只能发给自己，为了发送给其它人，要用一个容器，每条数据遍历容器，发送给所有人
+        }
+    }
+}
+
+class Channel implements Runnable{
+    private boolean isRunning = true;
+    private DataInputStream dis;
+    private DataOutputStream dos;
+    private List<Channel> list;
+    private Title title;
+    public Channel(Socket socket){
+        try {
+            dos = new DataOutputStream(socket.getOutputStream());
+            dis = new DataInputStream(socket.getInputStream());
+        } catch (IOException e) {
+           // e.printStackTrace();
+            isRunning = false;
+        }
+    }
+
+    public void setList(List<Channel> list) {
+        this.list = list;
+    }
+
+    private String receive(){
+        String msg="";
+        try {
+            msg = dis.readUTF();
+            System.out.println(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+            isRunning = false;
+            list.remove(this);
+        }
+        String role = msg.substring(0,2);
+        System.out.println(role);
+        if(msg.equals(title)&&role.equals("猜者")) {
+            return msg + "系统消息：恭喜你，答对了\n";
+        }else return msg;
+    }
+    private void send(String msg){
+        if(msg!=null&&!msg.equals("")){
+            try {
+                dos.writeUTF(msg);
+                dos.flush();
+            } catch (IOException e) {
+               // e.printStackTrace();
+                isRunning = false;
+                list.remove(this);
+            }
+        }
+    }
+    private void sendAll(){
+        String msg = receive();
+        for(Channel c:list){
+            c.send(msg);
+        }
+    }
+
+    @Override
+    public void run() {
+        while(isRunning){
+           sendAll();
+        }
+    }
+}
