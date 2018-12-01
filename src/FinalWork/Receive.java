@@ -35,7 +35,8 @@ public class Receive implements Runnable {
             is = new DataInputStream(socket.getInputStream());
             this.text = text;
         } catch (IOException e) {
-            e.printStackTrace();
+           // e.printStackTrace();
+            System.out.println("接收失败");
             isRunning = false;
         }
     }
@@ -45,7 +46,8 @@ public class Receive implements Runnable {
             String msg = is.readUTF();
             text.appendText(msg);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("接受失败");
             isRunning = false;
         }
     }

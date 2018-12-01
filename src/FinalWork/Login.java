@@ -15,14 +15,13 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+
+import java.util.Optional;
 
 /**
  * 〈一句话功能简述〉<br> 
@@ -94,16 +93,13 @@ public class Login extends Application {
     }
 
     private void loginClickedEvent(Stage primaryStage){
-        new ClientView("","");//仅调试使用
-        primaryStage.close();//仅调试使用
-
-        /*
         count++;
         String username = textUser.getText();
         String pwd = textpwd.getText();
-        if(username.equals("username")&&pwd.equals("123456")){
+        MyDataBase m = new MyDataBase();
+        if(m.checkedUser(username,pwd)){
             try {
-                ClientView c = new ClientView(username,pwd);
+                new ClientView(username,pwd);
                 primaryStage.close();
                 System.out.println("启动");
             } catch (Exception e) {
@@ -127,6 +123,6 @@ public class Login extends Application {
                 Platform.exit();
             }
         }
-        */
+
     }
 }

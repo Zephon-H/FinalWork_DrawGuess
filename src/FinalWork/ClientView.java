@@ -76,10 +76,6 @@ public class ClientView {
         }else{
             title = btt4.getText();
         }
-        HBox hBox = new HBox(new Paint(),new ChattingRoom(username,isDrawer));
-        Title.setTitle(title);
-        Scene scene = new Scene(hBox);
-        client.setScene(scene);
     }
 
     public void setRole(){
@@ -92,7 +88,9 @@ public class ClientView {
         Optional<ButtonType> result = alert.showAndWait();
         if(result.get()==btt1){
             isDrawer = true;
-            setTitle();
+            HBox hBox = new HBox(new Painter(),new ChattingRoom(username,isDrawer));
+            Scene scene = new Scene(hBox);
+            client.setScene(scene);
         }else{
             HBox hBox = new HBox(new Guesser(),new ChattingRoom(username,isDrawer));
             Scene scene = new Scene(hBox);

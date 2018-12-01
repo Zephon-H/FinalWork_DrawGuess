@@ -1,6 +1,6 @@
 /**
  * Copyright (C), 2015-2018, XXX有限公司
- * FileName: Paint
+ * FileName: Painter
  * Author:   Zephon
  * Date:     2018/11/28 21:00
  * Description:
@@ -22,8 +22,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * 〈一句话功能简述〉<br> 
@@ -32,7 +34,7 @@ import java.io.IOException;
  * @create 2018/11/28
  * @since 1.0.0
  */
-public class Paint extends VBox {
+public class Painter extends VBox {
     private Drawer drawer;
     private Button btPenSet;
     private Button btEraserSet;
@@ -40,7 +42,7 @@ public class Paint extends VBox {
     private Button btClear;
     private double WIDTH=800,HEIGHT=600;
 
-    public Paint(){
+    public Painter(){
         init();
     }
 
@@ -65,13 +67,14 @@ public class Paint extends VBox {
         HBox.setHgrow(btClear, Priority.ALWAYS);
 
         drawer = new Drawer(WIDTH,480.0/500.0*HEIGHT);
-
         drawer.setColor(Color.BLACK);
 
         penClickedEvent();
         eraserClickedEvent();
         colorClickedEvent();
         clearClickedEvent();
+
+        new Thread(){}.start();
 
         this.getChildren().addAll(hBox,drawer);
         this.setStyle("-fx-background-color: #fff");
@@ -111,12 +114,20 @@ public class Paint extends VBox {
         });
     }
 
-    public void getPic(){
+    //获得Canvas图片文件
+    //但无法获得流。。。
+    public void getPic(Socket socket){
         WritableImage image = drawer.snapshot(new SnapshotParameters(), null);
         File file = new File("E:a.png");
         try {
             ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-            // FileOutputStream os = new FileOutputStream(file);
+            FileInputStream fis = new FileInputStream(file);
+            OutputStream os = socket.getOutputStream();
+            byte[] buf = new byte[1024];
+            int len=0;
+            while(-1!=(len=fis.read(buf))){
+                os.write(buf, 0, len);
+            }
             System.out.println("保存成功");
         } catch (IOException ex) {
             System.out.println("保存失败");

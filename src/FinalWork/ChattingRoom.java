@@ -59,7 +59,8 @@ public class ChattingRoom extends VBox {
             s.send();
             new Thread(new Receive(socket,text)).start();
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("聊天服务器连接失败");
         }
     }
 }

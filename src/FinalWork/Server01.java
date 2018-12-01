@@ -47,9 +47,12 @@ class Channel implements Runnable{
     private DataInputStream dis;
     private DataOutputStream dos;
     private List<Channel> list;
-    private Title title;
+    private String title;
+    private MyDataBase m ;
     public Channel(Socket socket){
         try {
+            m = new MyDataBase();
+            title = m.getCurrentTitle();
             dos = new DataOutputStream(socket.getOutputStream());
             dis = new DataInputStream(socket.getInputStream());
         } catch (IOException e) {
@@ -72,12 +75,16 @@ class Channel implements Runnable{
             isRunning = false;
             list.remove(this);
         }
-        String role = msg.substring(0,2);
-        System.out.println(role);
-        if(msg.equals(title)&&role.equals("猜者")) {
+        String role="";
+        if(msg!=null&&!msg.equals("")){
+            role = msg.substring(0,1);
+        }
+        if(msg.equals(title)&&role.equals("猜者")&&title!=null) {
+            m.delete("delete from title_table where title="+"'"+title+"'");
             return msg + "系统消息：恭喜你，答对了\n";
         }else return msg;
     }
+
     private void send(String msg){
         if(msg!=null&&!msg.equals("")){
             try {

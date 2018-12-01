@@ -10,11 +10,19 @@
  */
 package FinalWork;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.Socket;
 
 /**
  * 〈一句话功能简述〉<br> 
@@ -32,6 +40,7 @@ public class Drawer extends Canvas {
     private Button btEraserSet;
     private Button btColorSet;
     private Paint color;
+    private Socket picSocket;
 
     /**
      * 构造函数初始化
@@ -40,6 +49,12 @@ public class Drawer extends Canvas {
      */
     public Drawer(double width,double height){
         super(width,height);
+        try {
+            picSocket = new Socket("localhost",9999);
+        } catch (IOException e) {
+            System.out.println("图片服务器连接失败");
+        }
+        //picSocket = new Socket();
         color = Color.BLACK;
         gc = getGraphicsContext2D();
         gc.save();
@@ -77,6 +92,7 @@ public class Drawer extends Canvas {
      */
     public void paint(){
         setOnMousePressed(event -> {
+            sendPic();
             startX = event.getX();
             startY = event.getY();
         });
@@ -86,8 +102,36 @@ public class Drawer extends Canvas {
             gc.strokeLine(startX, startY, endX, endY);
             startX = endX;
             startY = endY;
+            sendPic();
+        });
+        setOnMouseReleased(event -> {
+            sendPic();
         });
     }
+
+    public void sendPic(){
+        WritableImage image = this.snapshot(new SnapshotParameters(), null);
+        File file = new File("file:a.png");
+
+        int length = 0;
+        byte[] sendBytes = null;
+        DataOutputStream dos = null;
+        FileInputStream fis = null;
+        try {
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+                dos = new DataOutputStream(picSocket.getOutputStream());
+                fis = new FileInputStream(file);
+                sendBytes = new byte[1024];
+                while ((length = fis.read(sendBytes, 0, sendBytes.length)) > 0) {
+                    dos.write(sendBytes, 0, length);
+                    dos.flush();
+                }
+            System.out.println("保存成功");
+        } catch (Exception e) {
+            //e.printStackTrace();
+            System.out.println("图片保存失败");
+        }
+        }
 
     /**
      * 清屏
@@ -95,5 +139,6 @@ public class Drawer extends Canvas {
     public void clear(){
        gc.setFill(Color.WHITE);
        gc.fillRect(0,0,getWidth(),getHeight());
+        sendPic();
     }
 }
